@@ -1,7 +1,7 @@
 # file: postgresql/defaults/main.yml
 
 # Basic settings
-postgresql_version: 9.3
+postgresql_version: 9.4
 postgresql_encoding: 'UTF-8'
 postgresql_locale: 'en_US.UTF-8'
 
@@ -648,3 +648,18 @@ postgresql_apt_key_url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
 postgresql_apt_repository: 'deb http://apt.postgresql.org/pub/repos/apt/ {{ansible_distribution_release}}-pgdg main'
 # Pin-Priority of PGDG repository
 postgresql_apt_pin_priority: 500
+
+
+# repmgr
+repmgr_enabled: no
+repmgr_log_level: INFO
+repmgr_log_dir: /var/log/postgresql
+# repmgr_log_file: "{{ repmgr_log_dir }}/repmgr.conf"
+repmgr_conf_dir: /etc/repmgr
+repmgr_conf_file: "{{ repmgr_conf_dir }}/repmgr.conf"
+repmgr_user: "{{ postgresql_service_user }}"
+repmgr_group: "{{ postgresql_service_group }}"
+repmgr_cluster_name: "{{ postgresql_cluster_name }}"
+repmgr_failover: manual
+# repmgr_node_id: None
+repmgr_node_name: "{{ ansible_hostname }}"

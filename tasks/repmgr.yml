@@ -1,0 +1,32 @@
+---
+- name: generate ssh key
+  command: ssh-keygen -t rsa -f /var/lib/postgresql/.ssh/id_rsa
+  args:
+    creates: /var/lib/postgresql/.ssh/id_rsa
+  sudo: yes
+  sudo_user: postgres
+
+- command: cat /var/lib/postgresql/.ssh/id_rsa.pub
+  changed_when: False
+  register: ssh_key_result
+
+- set_fact:
+    postgresql_ssh_public_key: "{{ ssh_key_result.stdout | trim }}"
+
+- name: install repmgr
+  apt: pkg={{item}} state=present
+  with_items:
+    - repmgr
+    - postgresql-{{ postgresql_version }}-repmgr
+
+- name: ensure repmgr dirs
+  file: path={{ item }} state=directory owner={{ repmgr_user }}
+  with_items:
+    - "{{ repmgr_conf_dir }}"
+    - "{{ repmgr_log_dir }}"
+
+- name: render repmgr config
+  template: >
+    src=repmgr.conf.j2
+    dest={{ repmgr_conf_file }}
+    owner={{ repmgr_user }} group={{ repmgr_group }}

@@ -1,0 +1,107 @@
+###################################################
+# Replication Manager sample configuration file
+###################################################
+
+# Required configuration items
+# ============================
+#
+# repmgr and repmgrd require these items to be configured:
+
+# Cluster name - this will be used by repmgr to generate its internal
+# schema (pattern: "repmgr_{cluster}"); while this name will be quoted
+# to preserve case, we recommend using lower case and avoiding whitespace
+# to facilitate easier querying of the repmgr views and tables.
+cluster={{ repmgr_cluster_name | replace('-', '_') | replace('.', '_') | replace(' ', '_') }}
+
+# Node ID and name
+# (Note: we recommend to avoid naming nodes after their initial
+#  replication funcion, as this will cause confusion when e.g.
+#  "standby2" is promoted to master)
+node={{ repmgr_node_id }}
+node_name={{ repmgr_node_name }}
+
+# Database connection information
+conninfo='host={{ ansible_hostname }} dbname=repmgr user=repmgr'
+
+# Optional configuration items
+# ============================
+
+# Replication settings
+# ---------------------
+
+# when using cascading replication and a standby is to be connected to an
+# upstream standby, specify that node's ID with 'upstream_node'. The node
+# must exist before the new standby can be registered. If a standby is
+# to connect directly to a master node, this parameter is not required.
+#
+# upstream_node=1
+
+# physical replication slots - PostgreSQL 9.4 and later only
+# (default: 0)
+#
+use_replication_slots=1
+
+
+# Logging and monitoring settings
+# -------------------------------
+
+# Log level: possible values are DEBUG, INFO, NOTICE, WARNING, ERR, ALERT, CRIT or EMERG
+# (default: NOTICE)
+loglevel={{ repmgr_log_level | upper }}
+
+# Logging facility: possible values are STDERR or - for Syslog integration - one of LOCAL0, LOCAL1, ..., LOCAL7, USER
+# (default: STDERR)
+logfacility=STDERR
+
+# stderr can be redirected to an arbitrary file:
+#
+{% if repmgr_log_file is defined %}
+logfile='{{ repmgr_log_file }}/repmgr.log'
+{% endif %}
+
+# event notifications can be passed to an arbitrary external program
+# together with the following parameters:
+#
+#   %n - node ID
+#   %e - event type
+#   %s - success (1 or 0)
+#   %t - timestamp
+#   %d - details
+#
+# the values provided for "%t" and "%d" will probably contain spaces,
+# so should be quoted in the provided command configuration, e.g.:
+#
+# event_notification_command='/path/to/some/script %n %e %s "%t" "%d"'
+
+# By default, all notifications will be passed; the notification types
+# can be filtered to explicitly named ones:
+#
+# event_notifications=master_register,standby_register,witness_create
+
+
+# Environment/command settings
+# ----------------------------
+
+# path to PostgreSQL binary directory (location of pg_ctl, pg_basebackup etc.)
+# (if not provided, defaults to system $PATH)
+# pg_bindir=/usr/bin/
+
+# external command options
+
+rsync_options=--archive --checksum --compress --progress --rsh="ssh -o \"StrictHostKeyChecking no\""
+ssh_options=-o "StrictHostKeyChecking no"
+
+# external command arguments
+
+# pg_ctl_options='-s'
+pg_basebackup_options='--xlog-method=stream'
+
+
+# Standby clone settings
+# ----------------------
+#
+# These settings apply when cloning a standby (`repmgr standby clone`).
+
+# Tablespaces can be remapped from one file system location to another:
+#
+# tablespace_mapping=/path/to/original/tablespace=/path/to/new/tablespace

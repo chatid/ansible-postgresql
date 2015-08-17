@@ -18,6 +18,10 @@
 - include: users_privileges.yml
   tags: [postgresql, postgresql-users]
 
+- include: repmgr.yml
+  when: repmgr_enabled|bool
+  tags: [postgresql, postgresql-repmgr]
+
 - include: monit.yml
   when: monit_protection is defined and monit_protection == true
   tags: [postgresql, postgresql-monit]
