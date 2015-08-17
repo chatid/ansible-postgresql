@@ -19,7 +19,6 @@
   tags: [postgresql, postgresql-users]
 
 - include: repmgr.yml
-  when: repmgr_enabled|bool
   tags: [postgresql, postgresql-repmgr]
 
 - include: monit.yml
