@@ -1,0 +1,72 @@
+- hosts: all
+  sudo: yes
+
+  vars:
+    postgresql_listen_addresses: ['*']
+    postgresql_wal_level: hot_standby
+    postgresql_hot_standby: on
+    postgresql_archive_mode: on
+    postgresql_archive_command: cd .
+    postgresql_max_wal_senders: 10
+    postgresql_wal_keep_segments: 5000
+    postgresql_listen_addresses: ['*']
+    postgresql_max_replication_slots: 2
+    postgresql_pg_hba_custom:
+      - { type: host, database: repmgr, user: repmgr, address: 192.168.0.0/16, method: trust, comment: "repmgr connection" }
+      - { type: host, database: replication, user: all, address: 192.168.0.0/16, method: trust, comment: "replication connection" }
+    repmgr_nodes: [machine1, machine2]
+    repmgr_node_id: "{{ repmgr_nodes.index(inventory_hostname) + 1 }}"
+
+  roles:
+    - role: chatid.postgresql
+
+
+- hosts: machine1
+  sudo: yes
+
+  tasks:
+    - name: add standby public ssh key
+      authorized_key: >
+        user=postgres key="{{ hostvars['machine2'].postgresql_ssh_public_key }}"
+
+    - name: ensure repmgr user
+      postgresql_user: name=repmgr role_attr_flags=LOGIN,SUPERUSER
+
+    - name: ensure repmgr database
+      postgresql_db: name=repmgr owner=repmgr
+
+    - name: register master
+      shell: su postgres -c 'repmgr -f /etc/repmgr/repmgr.conf --verbose master register'
+      ignore_errors: True
+
+
+- hosts: machine2
+  sudo: yes
+
+  tasks:
+    - name: add hosts file entry for master as this is usually handled by cloud provider DNS
+      lineinfile: dest=/etc/hosts line='192.168.77.22 machine1'
+
+    - name: add master public ssh key
+      authorized_key: >
+        user=postgres key="{{ hostvars['machine1'].postgresql_ssh_public_key }}"
+
+    - name: stop postgresql
+      service: name=postgresql state=stopped
+
+    - name: clone standby data from master
+      shell: >
+        rm -rf /var/lib/postgresql/9.4/main/* && su postgres -c 'repmgr
+        -U repmgr
+        -d repmgr
+        -f /etc/repmgr/repmgr.conf
+        -D /var/lib/postgresql/9.4/main
+        --verbose
+        standby clone 192.168.77.22'
+
+    - name: start postgresql
+      service: name=postgresql state=started
+
+    - name: register standby
+      shell: >
+        su postgres -c 'repmgr -f /etc/repmgr/repmgr.conf --verbose standby register'

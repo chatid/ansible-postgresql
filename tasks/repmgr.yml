@@ -1,10 +1,8 @@
 ---
 - name: generate ssh key
-  command: ssh-keygen -t rsa -f /var/lib/postgresql/.ssh/id_rsa
+  command: su postgres -c 'ssh-keygen -t rsa -P "" -f /var/lib/postgresql/.ssh/id_rsa'
   args:
     creates: /var/lib/postgresql/.ssh/id_rsa
-  sudo: yes
-  sudo_user: postgres
 
 - command: cat /var/lib/postgresql/.ssh/id_rsa.pub
   changed_when: False
