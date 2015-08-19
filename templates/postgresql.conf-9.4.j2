@@ -205,10 +205,14 @@ checkpoint_warning = {{postgresql_checkpoint_warning}}		# 0 disables
 
 archive_mode = {{'on' if postgresql_archive_mode else 'off'}}		# allows archiving to be done
 				# (change requires restart)
+{% if wal_e_enabled|bool %}
+archive_command = '{{ wal_e_archive_command }}'
+{% else %}
 archive_command = '{{postgresql_archive_command}}'		# command to use to archive a logfile segment
 				# placeholders: %p = path of file to archive
 				#               %f = file name only
 				# e.g. 'test ! -f /mnt/server/archivedir/%f && cp %p /mnt/server/archivedir/%f'
+{% endif %}
 archive_timeout = {{postgresql_archive_timeout}}		# force a logfile segment switch after this
 				# number of seconds; 0 disables
 

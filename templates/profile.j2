@@ -1,0 +1,8 @@
+export PGDATA={{ postgresql_data_directory }}
+export PATH="$PATH:/usr/lib/postgresql/{{ postgresql_version }}/bin"
+alias ll="ls -alF"
+{% if wal_e_storage_access_key_id is defined %}
+export {{ ('aws' if wal_e_storage_service == 's3' else wal_e_storage_service) | upper }}_ACCESS_KEY_ID='{{ wal_e_storage_access_key_id }}'
+export {{ ('aws' if wal_e_storage_service == 's3' else wal_e_storage_service) | upper }}_SECRET_ACCESS_KEY='{{ wal_e_storage_secret_access_key }}'
+{% endif %}
+export WALE_{{ wal_e_storage_service | upper }}_PREFIX='{{ wal_e_storage_service }}://{{ wal_e_storage_bucket }}{{ '/' if not wal_e_storage_prefix.startswith('/') else '' }}{{ wal_e_storage_prefix }}'

@@ -1,0 +1,20 @@
+- name: install system packages for wal-e
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - lzop
+    - pv
+    - python-pip
+    - python-dev
+    - python-lxml
+
+- name: Install wal-e via pip
+  pip: name={{ wal_e_package_name }} version={{ wal_e_package_version }}
+
+- name: appears that pip does not correctly fix up the paths
+  easy_install: name=wal-e
+
+- name: render .profile for wal-e
+  template: >
+    src=profile.j2 dest=/var/lib/postgresql/.profile
+    owner={{ postgresql_service_user }} group={{ postgresql_service_group }} mode=0750
+

@@ -9,11 +9,13 @@
     postgresql_archive_command: cd .
     postgresql_max_wal_senders: 10
     postgresql_wal_keep_segments: 5000
+    postgresql_archive_timeout: 60
     postgresql_listen_addresses: ['*']
     postgresql_max_replication_slots: 2
     postgresql_pg_hba_custom:
       - { type: host, database: repmgr, user: repmgr, address: 192.168.0.0/16, method: trust, comment: "repmgr connection" }
       - { type: host, database: replication, user: all, address: 192.168.0.0/16, method: trust, comment: "replication connection" }
+
     repmgr_nodes: [machine1, machine2]
     repmgr_node_id: "{{ repmgr_nodes.index(inventory_hostname) + 1 }}"
 
@@ -43,6 +45,9 @@
 - hosts: machine2
   sudo: yes
 
+  vars_files:
+    - ../defaults/main.yml
+
   tasks:
     - name: add hosts file entry for master as this is usually handled by cloud provider DNS
       lineinfile: dest=/etc/hosts line='192.168.77.22 machine1'
@@ -70,3 +75,21 @@
     - name: register standby
       shell: >
         su postgres -c 'repmgr -f /etc/repmgr/repmgr.conf --verbose standby register'
+      ignore_errors: True
+
+    - name: ensure the restore command is set
+      lineinfile: >
+        dest=/var/lib/postgresql/9.4/main/recovery.conf
+        line="restore_command = '{{ wal_e_restore_command }}'"
+        regexp="^restore_command"
+        create=yes state=present
+
+- hosts: machine1
+  sudo: yes
+
+  vars_files:
+    - ../defaults/main.yml
+
+  tasks:
+    - name: test wal-e push
+      command: "su postgres -c '{{ wal_e_archive_command }}'"

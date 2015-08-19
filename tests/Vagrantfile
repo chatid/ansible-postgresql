@@ -1,8 +1,19 @@
-# -*- mode: ruby -*-
+    # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
+
+if ENV['STORAGE_PREFIX'].nil? && ENV['CHATID_IAM_USER'].nil?
+  puts "CHATID_IAM_USER environment variable is not set"
+  exit(1)
+end
+
+STORAGE_SERVICE = ENV['STORAGE_SERVICE'] || 's3'
+STORAGE_BUCKET = ENV['STORAGE_BUCKET'] || 'chatid-sandbox'
+STORAGE_PREFIX = ENV['STORAGE_PREFIX'] || "#{ENV['CHATID_IAM_USER']}/wal-e"
+STORAGE_ACCESS_KEY = ENV['CHATID_AWS_ACCESS_KEY']
+STORAGE_SECRET_KEY = ENV['CHATID_AWS_SECRET_KEY']
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -25,6 +36,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.limit = "all"
       ansible.verbose = true
       ansible.playbook = "test.yml"
+      ansible.groups = {
+        "master" => ["machine1"],
+        "standby" => ["machine2"],
+        "standby:vars" => { "postgresql_role" => "standby" }
+      }
+      ansible.extra_vars = {
+        wal_e_enabled: 'yes',
+        wal_e_storage_service: STORAGE_SERVICE,
+        wal_e_storage_bucket: STORAGE_BUCKET,
+        wal_e_storage_prefix: STORAGE_PREFIX,
+        wal_e_storage_access_key_id: STORAGE_ACCESS_KEY,
+        wal_e_storage_secret_access_key: STORAGE_SECRET_KEY
+      }
     end
   end
 

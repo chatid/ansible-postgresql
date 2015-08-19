@@ -46,7 +46,6 @@ postgresql_pg_hba_passwd_hosts: []
 postgresql_pg_hba_trust_hosts: []
 postgresql_pg_hba_custom: []
 
-
 # postgresql.conf
 
 #------------------------------------------------------------------------------
@@ -233,7 +232,7 @@ postgresql_archive_mode: off
 # Placeholders: %p = path of file to archive
 #               %f = file name only
 # e.g. 'test ! -f /mnt/server/archivedir/%f && cp %p /mnt/server/archivedir/%f'
-postgresql_archive_command: ''
+postgresql_archive_command: 'cd .'
 
 # force a logfile segment switch after this
 postgresql_archive_timeout: 0
@@ -638,9 +637,6 @@ postgresql_pgtune_type: Mixed
 # Maximum number of expected connections, if "no", default based on db type
 postgresql_pgtune_connections: no
 
-
-
-
 postgresql_env:
   LC_ALL: "{{ postgresql_locale }}"
   LC_LCTYPE: "{{ postgresql_locale }}"
@@ -665,3 +661,17 @@ repmgr_cluster_name: "{{ postgresql_cluster_name }}"
 repmgr_failover: manual
 # repmgr_node_id: None
 repmgr_node_name: "{{ ansible_hostname }}"
+
+
+# wal-e
+wal_e_enabled: no
+wal_e_package_name: wal-e
+wal_e_package_version: 0.8.1
+wal_e_storage_service: s3
+#wal_e_storage_bucket:
+wal_e_storage_prefix: ''
+#wal_e_storage_access_key_id:
+#wal_e_storage_secret_access_key:
+wal_e_command_options: ''
+wal_e_archive_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} wal-push %p'
+wal_e_restore_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} wal-fetch "%f" "%p"'

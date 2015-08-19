@@ -6,6 +6,13 @@
 - include: extensions.yml
   tags: [postgresql, postgresql-extensions]
 
+- include: repmgr.yml
+  tags: [postgresql, postgresql-repmgr]
+
+- include: wal-e.yml
+  when: wal_e_enabled|bool
+  tags: [postgresql, postgresql-wal-e]
+
 - include: configure.yml
   tags: [postgresql, postgresql-configure]
 
@@ -17,9 +24,6 @@
 
 - include: users_privileges.yml
   tags: [postgresql, postgresql-users]
-
-- include: repmgr.yml
-  tags: [postgresql, postgresql-repmgr]
 
 - include: monit.yml
   when: monit_protection is defined and monit_protection == true
