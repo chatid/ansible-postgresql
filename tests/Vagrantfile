@@ -42,7 +42,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         "standby:vars" => { "postgresql_role" => "standby" }
       }
       ansible.extra_vars = {
-        wal_e_enabled: 'yes',
         wal_e_storage_service: STORAGE_SERVICE,
         wal_e_storage_bucket: STORAGE_BUCKET,
         wal_e_storage_prefix: STORAGE_PREFIX,

@@ -6,7 +6,6 @@
     postgresql_wal_level: hot_standby
     postgresql_hot_standby: on
     postgresql_archive_mode: on
-    postgresql_archive_command: cd .
     postgresql_max_wal_senders: 10
     postgresql_wal_keep_segments: 5000
     postgresql_archive_timeout: 60
@@ -18,6 +17,8 @@
 
     repmgr_nodes: [machine1, machine2]
     repmgr_node_id: "{{ repmgr_nodes.index(inventory_hostname) + 1 }}"
+
+    wal_e_enabled: yes
 
   roles:
     - role: chatid.postgresql
