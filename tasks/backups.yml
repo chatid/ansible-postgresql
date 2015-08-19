@@ -1,0 +1,24 @@
+---
+- name: render cron scripts
+  template: >
+    src={{ item }}.j2 dest=/usr/local/bin/postgresql-{{ item }} mode=775
+    owner={{ postgresql_service_user }} group={{ postgresql_service_group }}
+  with_items:
+    - backup.sh
+    - clean.sh
+
+- name: setup cron jobs
+  cron: >
+    name='Backup PostgreSQL'
+    job='/usr/local/bin/{{ item.job }}'
+    user={{ postgresql_service_user }}
+    weekday={{ item.cron.weekday }}
+    month={{ item.cron.month }}
+    day={{ item.cron.day }}
+    hour={{ item.cron.hour }}
+    minute={{ item.cron.minute }}
+  with_items:
+    - job: backup.sh
+      cron: "{{ postgresql_backup_cron }}"
+    - job: clean.sh
+      cron: "{{ postgresql_backup_clean_cron }}"

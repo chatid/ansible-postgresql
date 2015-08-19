@@ -25,6 +25,10 @@
 - include: users_privileges.yml
   tags: [postgresql, postgresql-users]
 
+- include: backups.yml
+  when: postgresql_backup_enabled|bool
+  tags: [postgresql, postgresql-backups]
+
 - include: monit.yml
   when: monit_protection is defined and monit_protection == true
   tags: [postgresql, postgresql-monit]

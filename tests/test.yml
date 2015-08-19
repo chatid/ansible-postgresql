@@ -2,6 +2,7 @@
   sudo: yes
 
   vars:
+    postgresql_backup_enabled: "{{ inventory_hostname == 'machine1' }}"
     postgresql_listen_addresses: ['*']
     postgresql_wal_level: hot_standby
     postgresql_hot_standby: on
@@ -19,6 +20,7 @@
     repmgr_node_id: "{{ repmgr_nodes.index(inventory_hostname) + 1 }}"
 
     wal_e_enabled: yes
+    wal_e_package_name: https://github.com/chatid/wal-e/archive/google.zip
 
   roles:
     - role: chatid.postgresql
@@ -84,13 +86,3 @@
         line="restore_command = '{{ wal_e_restore_command }}'"
         regexp="^restore_command"
         create=yes state=present
-
-- hosts: machine1
-  sudo: yes
-
-  vars_files:
-    - ../defaults/main.yml
-
-  tasks:
-    - name: test wal-e push
-      command: "su postgres -c '{{ wal_e_archive_command }}'"

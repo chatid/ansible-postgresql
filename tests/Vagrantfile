@@ -4,16 +4,27 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-if ENV['STORAGE_PREFIX'].nil? && ENV['CHATID_IAM_USER'].nil?
-  puts "CHATID_IAM_USER environment variable is not set"
-  exit(1)
+def fail(message)
+  puts message
+  exit 1
 end
 
 STORAGE_SERVICE = ENV['STORAGE_SERVICE'] || 's3'
-STORAGE_BUCKET = ENV['STORAGE_BUCKET'] || 'chatid-sandbox'
-STORAGE_PREFIX = ENV['STORAGE_PREFIX'] || "#{ENV['CHATID_IAM_USER']}/wal-e"
-STORAGE_ACCESS_KEY = ENV['CHATID_AWS_ACCESS_KEY']
-STORAGE_SECRET_KEY = ENV['CHATID_AWS_SECRET_KEY']
+fail "Invalid STORAGE_SERVICE" if ! ["s3", "gs"].include?(STORAGE_SERVICE)
+
+if STORAGE_SERVICE == 's3'
+  fail "CHATID_IAM_USER environment variable is not set" if ENV['STORAGE_PREFIX'].nil? && ENV['CHATID_IAM_USER'].nil?
+  STORAGE_BUCKET = ENV['STORAGE_BUCKET'] || 'chatid-sandbox'
+  STORAGE_PREFIX = ENV['STORAGE_PREFIX'] || "#{ENV['CHATID_IAM_USER']}/wal-e"
+  STORAGE_ACCESS_KEY = ENV['AWS_ACCESS_KEY_ID']
+  STORAGE_SECRET_KEY = ENV['AWS_SECRET_ACCESS_KEY']
+else
+  fail "STORAGE_BUCKET not defined" if ENV['STORAGE_BUCKET'].nil?
+  STORAGE_BUCKET = ENV['STORAGE_BUCKET']
+  STORAGE_PREFIX = ENV['STORAGE_PREFIX'] || "/wal-e-testing"
+  STORAGE_ACCESS_KEY = ENV['GS_ACCESS_KEY_ID']
+  STORAGE_SECRET_KEY = ENV['GS_SECRET_ACCESS_KEY']
+end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
