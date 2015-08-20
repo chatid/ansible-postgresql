@@ -9,8 +9,8 @@
 
 - name: setup cron jobs
   cron: >
-    name='Backup PostgreSQL'
-    job='/usr/local/bin/{{ item.job }}'
+    name='{{ item.desc }} PostgreSQL'
+    job='/usr/local/bin/postgresql-{{ item.job }}'
     user={{ postgresql_service_user }}
     weekday={{ item.cron.weekday }}
     month={{ item.cron.month }}
@@ -18,7 +18,9 @@
     hour={{ item.cron.hour }}
     minute={{ item.cron.minute }}
   with_items:
-    - job: backup.sh
+    - desc: Backup
+      job: backup.sh
       cron: "{{ postgresql_backup_cron }}"
-    - job: clean.sh
+    - desc: Cleanup
+      job: clean.sh
       cron: "{{ postgresql_backup_clean_cron }}"
