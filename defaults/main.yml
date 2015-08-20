@@ -679,7 +679,7 @@ wal_e_restore_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command
 postgresql_backup_enabled: no
 postgresql_backup_retain: 7
 
-postgresql_backup_command: '. /var/lib/postgresql/.profile && wal-e backup-push $PGDATA'
+postgresql_backup_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} backup-push $PGDATA'
 postgresql_backup_cron:
   weekday: '*'
   month: '*'
@@ -687,7 +687,7 @@ postgresql_backup_cron:
   hour: 0
   minute: 0
 
-postgresql_backup_clean_command: '. /var/lib/postgresql/.profile && wal-e delete --confirm retain {{ postgresql_backup_retain }}'
+postgresql_backup_clean_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} delete --confirm retain {{ postgresql_backup_retain }}'
 postgresql_backup_clean_cron:
   weekday: '*'
   month: '*'
