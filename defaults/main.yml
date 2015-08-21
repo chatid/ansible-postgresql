@@ -685,7 +685,7 @@ postgresql_backup_cron:
   weekday: '*'
   month: '*'
   day: '*'
-  hour: 0
+  hour: 5
   minute: 0
 
 postgresql_backup_clean_log: /var/log/postgresql/backup.clean.log
@@ -694,6 +694,6 @@ postgresql_backup_clean_cron:
   weekday: '*'
   month: '*'
   day: '*'
-  hour: 0
+  hour: 6
   minute: 0
 
