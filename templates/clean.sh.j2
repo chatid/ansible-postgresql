@@ -1,2 +1,2 @@
 #!/bin/bash -e
-{{ postgresql_backup_clean_command }} >> {{ postgresql_backup_clean_log }}
+{{ postgresql_backup_clean_command }} >>{{ postgresql_backup_clean_log }} 2>&1
