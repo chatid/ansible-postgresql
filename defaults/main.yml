@@ -672,15 +672,15 @@ wal_e_storage_prefix: ''
 #wal_e_storage_access_key_id:
 #wal_e_storage_secret_access_key:
 wal_e_command_options: ''
-wal_e_archive_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} wal-push %p'
-wal_e_restore_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} wal-fetch "%f" "%p"'
+wal_e_archive_command: '. /var/lib/postgresql/.profile && /usr/local/bin/wal-e {{ wal_e_command_options }} wal-push %p'
+wal_e_restore_command: '. /var/lib/postgresql/.profile && /usr/local/bin/wal-e {{ wal_e_command_options }} wal-fetch "%f" "%p"'
 
 # Backups
 postgresql_backup_enabled: no
 postgresql_backup_retain: 7
 
 postgresql_backup_log: /var/log/postgresql/backup.log
-postgresql_backup_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} backup-push $PGDATA'
+postgresql_backup_command: '. /var/lib/postgresql/.profile && /usr/local/bin/wal-e {{ wal_e_command_options }} backup-push $PGDATA'
 postgresql_backup_cron:
   weekday: '*'
   month: '*'
@@ -689,7 +689,7 @@ postgresql_backup_cron:
   minute: 0
 
 postgresql_backup_clean_log: /var/log/postgresql/backup.clean.log
-postgresql_backup_clean_command: '. /var/lib/postgresql/.profile && wal-e {{ wal_e_command_options }} delete --confirm retain {{ postgresql_backup_retain }}'
+postgresql_backup_clean_command: '. /var/lib/postgresql/.profile && /usr/local/bin/wal-e {{ wal_e_command_options }} delete --confirm retain {{ postgresql_backup_retain }}'
 postgresql_backup_clean_cron:
   weekday: '*'
   month: '*'
